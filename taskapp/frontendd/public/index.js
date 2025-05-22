@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from 'taskapp/frontend/src/app.js';
+import App from './app';
 import { Amplify } from 'aws-amplify';
 import awsconfig from './aws-exports';
 
