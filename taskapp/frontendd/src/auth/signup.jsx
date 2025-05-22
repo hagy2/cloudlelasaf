@@ -1,64 +1,62 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { signUp, confirmSignUp } from '@aws-amplify/auth';
+import { useNavigate } from 'react-router-dom';
 
-export default function SignUp() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    phone_number: ''
-  });
-
-  const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
+function Signup() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [confirmationCode, setConfirmationCode] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const navigate = useNavigate();
 
   const handleSignUp = async () => {
     try {
-      const res = await fetch("https://your-api-url/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+      await signUp({
+        username,
+        password,
+        options: {
+          userAttributes: { email },
+        },
       });
+      setShowConfirmation(true);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
-      const data = await res.json();
-      console.log("Signup successful:", data);
-    } catch (err) {
-      console.error("Signup error:", err);
+  const handleConfirmSignUp = async () => {
+    try {
+      await confirmSignUp({ username, confirmationCode });
+      alert('Sign up successful! Please sign in.');
+      navigate('/signin');
+    } catch (error) {
+      setError(error.message);
     }
   };
 
   return (
     <div>
-      <h2>Sign Up</h2>
-      <input
-        name="email"
-        placeholder="Email"
-        value={formData.email}
-        onChange={handleChange}
-      />
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={formData.password}
-        onChange={handleChange}
-      />
-      <input
-        name="name"
-        placeholder="Full Name"
-        value={formData.name}
-        onChange={handleChange}
-      />
-      <input
-        name="phone_number"
-        placeholder="Phone Number (+1234567890)"
-        value={formData.phone_number}
-        onChange={handleChange}
-      />
-      <button onClick={handleSignUp}>Sign Up</button>
+      {!showConfirmation ? (
+        <>
+          <h2>Sign Up</h2>
+          <input placeholder="Username" onChange={e => setUsername(e.target.value)} />
+          <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
+          <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
+          <button onClick={handleSignUp}>Sign Up</button>
+          {error && <p>{error}</p>}
+        </>
+      ) : (
+        <>
+          <h2>Confirm Sign Up</h2>
+          <input placeholder="Confirmation Code" onChange={e => setConfirmationCode(e.target.value)} />
+          <button onClick={handleConfirmSignUp}>Confirm</button>
+          {error && <p>{error}</p>}
+        </>
+      )}
     </div>
   );
 }
+
+export default Signup;

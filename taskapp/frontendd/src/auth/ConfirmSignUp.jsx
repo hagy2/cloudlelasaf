@@ -1,5 +1,9 @@
-import { Auth } from 'aws-amplify';
+
 import { useState } from 'react';
+import { Authenticator } from '@aws-amplify/ui-react';
+// Correct way in Amplify v6+
+import { Auth } from 'aws-amplify';
+
 
 export default function ConfirmSignUp() {
   const [email, setEmail] = useState('');

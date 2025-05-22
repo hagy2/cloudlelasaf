@@ -1,59 +1,30 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { signIn } from '@aws-amplify/auth';
 
-export default function Login() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+function Signin() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
-
-  const handleLogin = async () => {
+  const handleSignIn = async () => {
     try {
-      const res = await fetch("https://your-api-url/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await res.json();
-      console.log("Login successful:", data);
-
-      // Store tokens if returned (for session management)
-      if (data.accessToken) {
-        localStorage.setItem("accessToken", data.accessToken);
-        alert("Logged in successfully!");
-      } else {
-        alert("Login failed.");
-      }
-
-    } catch (err) {
-      console.error("Login error:", err);
+      const user = await signIn(username, password);
+      console.log('Signed in user:', user);
+      // Redirect to home or dashboard page here
+    } catch (error) {
+      setError(error.message);
     }
   };
 
   return (
     <div>
-      <h2>Log In</h2>
-      <input
-        name="email"
-        placeholder="Email"
-        value={formData.email}
-        onChange={handleChange}
-      />
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={formData.password}
-        onChange={handleChange}
-      />
-      <button onClick={handleLogin}>Log In</button>
+      <h2>Sign In</h2>
+      <input placeholder="Username" onChange={e => setUsername(e.target.value)} />
+      <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
+      <button onClick={handleSignIn}>Sign In</button>
+      {error && <p>{error}</p>}
     </div>
   );
 }
+
+export default Signin;

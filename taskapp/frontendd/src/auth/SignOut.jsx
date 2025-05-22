@@ -1,13 +1,18 @@
 import React from 'react';
-import { Auth } from 'aws-amplify';
+import { signOut } from '@aws-amplify/auth';
 
-function SignOut() {
+function Signout() {
   const handleSignOut = async () => {
-    await Auth.signOut();
-    alert('Signed out!');
+    try {
+      await signOut();
+      // Redirect to login page or home
+      window.location.href = '/signin';
+    } catch (error) {
+      console.log('Error signing out:', error);
+    }
   };
 
   return <button onClick={handleSignOut}>Sign Out</button>;
 }
 
-export default SignOut;
+export default Signout;
