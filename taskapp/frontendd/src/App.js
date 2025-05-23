@@ -2,17 +2,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
-
 import '@aws-amplify/ui-react/styles.css'; // Amplify UI styles
 import './App.css';
 import logo from './logo.svg';
 import { Authenticator } from '@aws-amplify/ui-react';
 
-
 // Import your auth components
 import Signup from './auth/signup';
 import Signin from './auth/SignIn';
-import Signout from './auth/SignOut';
+import Signout from './auth/Signout';
 
 function Home() {
   return (
@@ -22,7 +20,8 @@ function Home() {
       <nav>
         <Link to="/profile" className="App-link">Go to Profile</Link> |{' '}
         <Link to="/signin" className="App-link">Sign In</Link> |{' '}
-        <Link to="/signup" className="App-link">Sign Up</Link>
+        <Link to="/signup" className="App-link">Sign Up</Link> |{' '}
+        <Link to="/signout" className="App-link">Sign Out</Link>
       </nav>
     </header>
   );
@@ -50,8 +49,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
-          {/* Optional: Add a route for signout if you want a dedicated page */}
-          {/* <Route path="/signout" element={<Signout />} /> */}
+          <Route path="/signout" element={<Signout />} />
         </Routes>
       </Router>
     </div>
