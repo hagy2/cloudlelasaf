@@ -1,368 +1,563 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { getCurrentUser, fetchAuthSession } from "@aws-amplify/auth";
 
-const TaskManager = () => {
+function TaskManager() {
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    status: "pending",
-  });
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("pending");
+  const [file, setFile] = useState(null);
+  const [editingTask, setEditingTask] = useState(null);
+  const [user, setUser] = useState(null);
+  const [authToken, setAuthToken] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Replace with your actual API Gateway URLs
-  const API_BASE_URL =
-    "https://plxbn1g54e.execute-api.us-east-1.amazonaws.com/dev";
+  // TODO: Replace with your actual API Gateway URL
+  // You can find this in AWS Console > API Gateway > Your API > Stages > Invoke URL
+  const API_URL =
+    "https://qru2r0k7c0.execute-api.us-east-1.amazonaws.com/please";
 
-  // Fetch all tasks
-  const fetchTasks = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/tasks`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  const fetchTasks = useCallback(
+    async (token = authToken) => {
+      if (!token) {
+        console.error("No auth token available");
+        return;
       }
 
-      const result = await response.json();
-      if (result.success) {
-        setTasks(result.data || []);
-
-        // Print file URLs to console for debugging
-        result.data?.forEach((task, index) => {
-          if (task.fileUrl) {
-            console.log(
-              `Task ${index + 1} (${task.title}) - File URL:`,
-              task.fileUrl
-            );
-            console.log(`File Name: ${task.fileName}`);
-            console.log("---");
-          }
+      try {
+        const response = await fetch(API_URL, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
-      } else {
-        console.error("Failed to fetch tasks:", result.error);
+
+        if (response.ok) {
+          const data = await response.json();
+          setTasks(data.tasks || data.data || []);
+        } else {
+          console.error("Failed to fetch tasks:", response.status);
+          const errorData = await response.text();
+          console.error("Error details:", errorData);
+        }
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
       }
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    } finally {
+    },
+    [authToken, API_URL]
+  );
+
+  const initAuth = useCallback(async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      const session = await fetchAuthSession();
+      const token = session.tokens?.idToken?.toString();
+
+      if (!token) {
+        throw new Error("No auth token found");
+      }
+
+      setUser(currentUser);
+      setAuthToken(token);
       setLoading(false);
+
+      fetchTasks(token);
+    } catch (error) {
+      console.error("Auth error:", error);
+      setLoading(false);
+      // User is not authenticated
+    }
+  }, [fetchTasks]);
+
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFile({
+          data: reader.result,
+          name: selectedFile.name,
+        });
+      };
+      reader.readAsDataURL(selectedFile);
     }
   };
 
-  // Create new task
   const createTask = async () => {
-    if (!formData.title.trim() || !formData.description.trim()) {
-      alert("Please fill in both title and description");
+    if (!title || !description) {
+      alert("Please fill in title and description");
       return;
     }
 
-    setLoading(true);
+    if (!authToken) {
+      alert("Authentication required");
+      return;
+    }
 
     try {
-      const payload = {
-        title: formData.title,
-        description: formData.description,
-        status: formData.status,
+      const body = {
+        title,
+        description,
+        status,
+        file: file?.data,
+        filename: file?.name,
       };
 
-      // Handle file upload
-      if (selectedFile) {
-        const reader = new FileReader();
-        const fileDataPromise = new Promise((resolve) => {
-          reader.onload = (e) => resolve(e.target.result);
-          reader.readAsDataURL(selectedFile);
-        });
-
-        const fileData = await fileDataPromise;
-        payload.file = fileData;
-        payload.filename = selectedFile.name;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/tasks`, {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(body),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result.success) {
-        setFormData({ title: "", description: "", status: "pending" });
-        setSelectedFile(null);
-
-        // Print the created task's file URL to console
-        if (result.data && result.data.fileUrl) {
-          console.log("=== NEW TASK CREATED ===");
-          console.log("Task ID:", result.data.taskId);
-          console.log("File URL:", result.data.fileUrl);
-          console.log("File Name:", result.data.fileName);
-          console.log("S3 Key:", result.data.s3Key);
-          console.log("========================");
-        }
-
-        fetchTasks(); // Refresh the list
+      if (response.ok) {
+        setTitle("");
+        setDescription("");
+        setStatus("pending");
+        setFile(null);
+        const fileInput = document.getElementById("fileInput");
+        if (fileInput) fileInput.value = "";
+        fetchTasks();
         alert("Task created successfully!");
       } else {
-        alert("Failed to create task: " + result.error);
+        const error = await response.json();
+        alert(
+          "Error creating task: " +
+            (error.error || error.message || "Unknown error")
+        );
       }
     } catch (error) {
       console.error("Error creating task:", error);
       alert("Error creating task: " + error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Load tasks on component mount
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+  const updateTask = async () => {
+    if (!editingTask) return;
+
+    if (!authToken) {
+      alert("Authentication required");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/${editingTask.task_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          status,
+        }),
+      });
+
+      if (response.ok) {
+        setEditingTask(null);
+        setTitle("");
+        setDescription("");
+        setStatus("pending");
+        fetchTasks();
+        alert("Task updated successfully!");
+      } else {
+        const error = await response.json();
+        alert(
+          "Error updating task: " +
+            (error.error || error.message || "Unknown error")
+        );
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+      alert("Error updating task: " + error.message);
+    }
+  };
+
+  const deleteTask = async (taskId) => {
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
+
+    if (!authToken) {
+      alert("Authentication required");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/${taskId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        fetchTasks();
+        alert("Task deleted successfully!");
+      } else {
+        const error = await response.json();
+        alert(
+          "Error deleting task: " +
+            (error.error || error.message || "Unknown error")
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      alert("Error deleting task: " + error.message);
+    }
+  };
+
+  const startEdit = (task) => {
+    setEditingTask(task);
+    setTitle(task.title);
+    setDescription(task.description);
+    setStatus(task.status);
+  };
+
+  const cancelEdit = () => {
+    setEditingTask(null);
+    setTitle("");
+    setDescription("");
+    setStatus("pending");
+  };
+
+  const refreshAuth = async () => {
+    setLoading(true);
+    await initAuth();
+  };
+
+  if (loading) {
+    return <div style={{ padding: "20px" }}>Loading...</div>;
+  }
+
+  if (!user || !authToken) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <h3>Authentication Required</h3>
+        <p>Please sign in to access the task manager.</p>
+        <button
+          onClick={refreshAuth}
+          style={{ padding: "10px 20px", margin: "10px" }}
+        >
+          Try to Sign In Again
+        </button>
+        <p>
+          <a href="/signin" style={{ color: "#0066cc" }}>
+            Go to Sign In Page
+          </a>{" "}
+          |
+          <a href="/signup" style={{ color: "#0066cc", marginLeft: "10px" }}>
+            Sign Up
+          </a>
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      <h1>Task Management System</h1>
-
-      {/* Create Task Section */}
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <div
         style={{
-          border: "1px solid #ccc",
-          padding: "20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           marginBottom: "20px",
         }}
       >
-        <h2>Create New Task</h2>
-
-        <div style={{ marginBottom: "10px" }}>
-          <label>Title:</label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-          />
+        <h1>Task Manager</h1>
+        <div>
+          <span style={{ marginRight: "15px" }}>Welcome, {user.username}!</span>
+          <button onClick={fetchTasks} style={{ padding: "5px 10px" }}>
+            Refresh Tasks
+          </button>
         </div>
+      </div>
 
-        <div style={{ marginBottom: "10px" }}>
-          <label>Description:</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            rows="4"
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-          />
-        </div>
+      {/* Create/Edit Form */}
+      <div
+        style={{
+          marginBottom: "30px",
+          padding: "20px",
+          border: "1px solid #ddd",
+          borderRadius: "5px",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <h3>{editingTask ? "Edit Task" : "Create New Task"}</h3>
 
-        <div style={{ marginBottom: "10px" }}>
-          <label>Status:</label>
-          <select
-            value={formData.status}
-            onChange={(e) =>
-              setFormData({ ...formData, status: e.target.value })
-            }
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-          >
-            <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <label>Attach File (optional):</label>
-          <input
-            type="file"
-            onChange={(e) => setSelectedFile(e.target.files[0])}
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-          />
-          {selectedFile && (
-            <p style={{ fontSize: "12px", color: "#666" }}>
-              Selected: {selectedFile.name} (
-              {(selectedFile.size / 1024).toFixed(1)} KB)
-            </p>
-          )}
-        </div>
-
-        <button
-          onClick={createTask}
-          disabled={loading}
+        <input
+          type="text"
+          placeholder="Task Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           style={{
-            padding: "10px 20px",
-            backgroundColor: loading ? "#ccc" : "#007bff",
-            color: "white",
-            border: "none",
-            cursor: loading ? "not-allowed" : "pointer",
+            width: "100%",
+            padding: "10px",
+            marginBottom: "10px",
+            border: "1px solid #ddd",
+            borderRadius: "4px",
+            fontSize: "14px",
+          }}
+        />
+
+        <textarea
+          placeholder="Task Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px",
+            marginBottom: "10px",
+            height: "80px",
+            border: "1px solid #ddd",
+            borderRadius: "4px",
+            fontSize: "14px",
+            resize: "vertical",
+          }}
+        />
+
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px",
+            marginBottom: "10px",
+            border: "1px solid #ddd",
+            borderRadius: "4px",
+            fontSize: "14px",
           }}
         >
-          {loading ? "Creating..." : "Create Task"}
-        </button>
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+
+        {!editingTask && (
+          <>
+            <input
+              id="fileInput"
+              type="file"
+              onChange={handleFileChange}
+              style={{
+                marginBottom: "10px",
+                padding: "8px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                width: "100%",
+              }}
+            />
+            {file && (
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "#666",
+                  marginBottom: "10px",
+                }}
+              >
+                Selected file: {file.name}
+              </p>
+            )}
+          </>
+        )}
+
+        <div>
+          {editingTask ? (
+            <>
+              <button
+                onClick={updateTask}
+                style={{
+                  marginRight: "10px",
+                  padding: "10px 20px",
+                  backgroundColor: "#28a745",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Update Task
+              </button>
+              <button
+                onClick={cancelEdit}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "#6c757d",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={createTask}
+              style={{
+                padding: "10px 20px",
+                backgroundColor: "#007bff",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              Create Task
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tasks List */}
       <div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h2>Tasks ({tasks.length})</h2>
-          <button
-            onClick={fetchTasks}
-            disabled={loading}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#28a745",
-              color: "white",
-              border: "none",
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-          >
-            {loading ? "Loading..." : "Refresh"}
-          </button>
-        </div>
+        <h3>Your Tasks ({tasks.length})</h3>
 
-        {loading ? (
-          <p>Loading tasks...</p>
-        ) : tasks.length === 0 ? (
-          <p>No tasks found. Create your first task above!</p>
+        {tasks.length === 0 ? (
+          <p style={{ textAlign: "center", color: "#666", padding: "20px" }}>
+            No tasks yet. Create your first task above!
+          </p>
         ) : (
-          <div style={{ display: "grid", gap: "15px" }}>
-            {tasks.map((task) => (
+          tasks.map((task) => (
+            <div
+              key={task.task_id || task.taskId}
+              style={{
+                padding: "15px",
+                margin: "10px 0",
+                border: "1px solid #ccc",
+                borderRadius: "5px",
+                backgroundColor:
+                  task.status === "completed"
+                    ? "#e8f5e8"
+                    : task.status === "in-progress"
+                    ? "#fff3cd"
+                    : "#f9f9f9",
+              }}
+            >
               <div
-                key={task.taskId}
                 style={{
-                  border: "1px solid #ddd",
-                  borderRadius: "5px",
-                  padding: "15px",
-                  backgroundColor: "#f9f9f9",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: "0 0 10px 0", color: "#333" }}>
-                      {task.title}
-                    </h3>
-                    <p style={{ margin: "0 0 10px 0", color: "#666" }}>
-                      {task.description}
-                    </p>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "15px",
-                        fontSize: "14px",
-                        color: "#888",
-                      }}
-                    >
-                      <span>
-                        Status: <strong>{task.status}</strong>
-                      </span>
-                      <span>
-                        Created: {new Date(task.createdAt).toLocaleDateString()}
-                      </span>
-                      <span>ID: {task.taskId.slice(0, 8)}...</span>
-                    </div>
-                  </div>
-
-                  {task.fileUrl && task.fileName && (
-                    <div style={{ marginLeft: "15px" }}>
-                      <div
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ margin: "0 0 10px 0" }}>{task.title}</h4>
+                  <p style={{ margin: "0 0 10px 0" }}>{task.description}</p>
+                  <div style={{ fontSize: "12px", color: "#666" }}>
+                    <span>
+                      Status:{" "}
+                      <strong
                         style={{
-                          padding: "8px 12px",
-                          backgroundColor: "#e9ecef",
-                          borderRadius: "4px",
-                          textAlign: "center",
+                          color:
+                            task.status === "completed"
+                              ? "green"
+                              : task.status === "in-progress"
+                              ? "orange"
+                              : "blue",
                         }}
                       >
-                        <p
-                          style={{
-                            margin: "0 0 5px 0",
-                            fontSize: "12px",
-                            color: "#666",
-                          }}
-                        >
-                          Attachment:
-                        </p>
-                        <a
-                          href={task.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => {
-                            console.log("=== FILE CLICKED ===");
-                            console.log("Task:", task.title);
-                            console.log("File URL:", task.fileUrl);
-                            console.log("File Name:", task.fileName);
-                            console.log("==================");
-                          }}
-                          style={{
-                            color: "#007bff",
-                            textDecoration: "none",
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          📎 {task.fileName}
-                        </a>
-                        <p
-                          style={{
-                            margin: "5px 0 0 0",
-                            fontSize: "10px",
-                            color: "#999",
-                          }}
-                        >
-                          (Signed URL - 1h validity)
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                        {task.status}
+                      </strong>
+                    </span>{" "}
+                    |
+                    <span>
+                      {" "}
+                      Created:{" "}
+                      {new Date(
+                        task.created_at || task.createdAt
+                      ).toLocaleDateString()}
+                    </span>
+                    {(task.file_name || task.fileName) && (
+                      <span>
+                        {" "}
+                        | File:{" "}
+                        <strong>{task.file_name || task.fileName}</strong>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ marginLeft: "15px" }}>
+                  <button
+                    onClick={() => startEdit(task)}
+                    style={{
+                      marginRight: "5px",
+                      padding: "5px 10px",
+                      fontSize: "12px",
+                      backgroundColor: "#ffc107",
+                      color: "black",
+                      border: "none",
+                      borderRadius: "3px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteTask(task.task_id || task.taskId)}
+                    style={{
+                      padding: "5px 10px",
+                      fontSize: "12px",
+                      backgroundColor: "#dc3545",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "3px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
+
+              {(task.file_url || task.fileUrl) && (
+                <div style={{ marginTop: "10px" }}>
+                  <a
+                    href={task.file_url || task.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#0066cc" }}
+                  >
+                    📎 Download {task.file_name || task.fileName}
+                  </a>
+                </div>
+              )}
+            </div>
+          ))
         )}
       </div>
 
-      {/* API Configuration Notice */}
+      {/* Debug Info */}
       <div
         style={{
           marginTop: "30px",
-          padding: "15px",
-          backgroundColor: "#fff3cd",
-          border: "1px solid #ffeaa7",
-          borderRadius: "5px",
+          padding: "10px",
+          backgroundColor: "#f0f0f0",
+          fontSize: "12px",
+          borderRadius: "4px",
         }}
       >
-        <h4 style={{ margin: "0 0 10px 0" }}>⚠️ Configuration Required</h4>
-        <p style={{ margin: "0", fontSize: "14px" }}>
-          Update the <code>API_BASE_URL</code> constant in the code with your
-          actual API Gateway URL.
-          <br />
-          Current: <code>{API_BASE_URL}</code>
-        </p>
+        <strong>Debug Info:</strong>
+        <br />
+        API URL: {API_URL}
+        <br />
+        Auth Token: {authToken ? "Present" : "Missing"}
+        <br />
+        User: {user?.username}
+        <br />
+        Tasks Count: {tasks.length}
       </div>
     </div>
   );
-};
+}
 
 export default TaskManager;
