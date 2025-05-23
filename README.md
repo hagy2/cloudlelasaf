@@ -1,0 +1,10 @@
+graph TD
+    A[React Frontend] -->|HTTP Requests| B[API Gateway]
+    B -->|Route Requests| C[Lambda Functions]
+    C -->|CRUD Operations| D[(DynamoDB)]
+    C -->|Relational Data| E[(RDS MySQL)]
+    C -->|File Storage| F[(S3 Bucket)]
+    A -->|Authentication| G[Cognito User Pool]
+    C -->|Async Notifications| H[SQS Queue]
+    H -->|Trigger| I[Lambda: Send Emails]
+    C -->|Logging & Monitoring| J[CloudWatch]
