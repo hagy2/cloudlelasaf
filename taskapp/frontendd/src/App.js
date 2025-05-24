@@ -12,6 +12,8 @@ import Signup from './auth/signup';
 import Signin from './auth/SignIn';
 import Signout from './auth/Signout';
 import TaskManager from './components/TaskManager';
+ 
+import Profile from './components/profile';
 
 function Home() {
   return (
@@ -19,7 +21,7 @@ function Home() {
       <img src={logo} className="App-logo" alt="logo" />
       <p>Edit <code>src/App.js</code> and save to reload.</p>
       <nav>
-        <Link to="/profile" className="App-link">Go to Profile</Link> |{' '}
+        <Link to="/profile" className="App-link">Go to Profile</Link>|{' '}
         <Link to="/tasks" className="App-link">Go to Tasks</Link> |{' '}
         <Link to="/signin" className="App-link">Sign In</Link> |{' '}
         <Link to="/signup" className="App-link">Sign Up</Link> |{' '}
@@ -29,18 +31,8 @@ function Home() {
   );
 }
 
-function Profile() {
-  return (
-    <Authenticator>
-      {({ signOut, user }) => (
-        <div style={{ textAlign: 'center' }}>
-          <h2>Hello, {user.username}</h2>
-          <Signout />
-        </div>
-      )}
-    </Authenticator>
-  );
-}
+
+
 
 function App() {
   return (
@@ -49,6 +41,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
+
+
+
           <Route path="/tasks" element={<TaskManager />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
