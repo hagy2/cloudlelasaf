@@ -1,15 +1,20 @@
 {
   "dev": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-taskapp-dev-bfbd2-authRole",
-      "UnauthRoleArn": "arn:aws:iam::448049794339:role/amplify-taskapp-dev-bfbd2-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::448049794339:role/amplify-taskapp-dev-bfbd2-authRole",
+      "AuthRoleName": "amplify-frontendd-dev-99fa3-authRole",
+      "UnauthRoleArn": "arn:aws:iam::448049794339:role/amplify-frontendd-dev-99fa3-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::448049794339:role/amplify-frontendd-dev-99fa3-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-taskapp-dev-bfbd2-deployment",
-      "UnauthRoleName": "amplify-taskapp-dev-bfbd2-unauthRole",
-      "StackName": "amplify-taskapp-dev-bfbd2",
-      "StackId": "arn:aws:cloudformation:us-east-1:448049794339:stack/amplify-taskapp-dev-bfbd2/92ead620-373a-11f0-803b-0affde5324eb",
-      "AmplifyAppId": "d3drlheti8g284"
+      "DeploymentBucketName": "amplify-frontendd-dev-99fa3-deployment",
+      "UnauthRoleName": "amplify-frontendd-dev-99fa3-unauthRole",
+      "StackName": "amplify-frontendd-dev-99fa3",
+      "StackId": "arn:aws:cloudformation:us-east-1:448049794339:stack/amplify-frontendd-dev-99fa3/4d276500-3789-11f0-b7ca-0ed3d6e6b9f1",
+      "AmplifyAppId": "di53iea4izz9n"
+    },
+    "categories": {
+      "auth": {
+        "frontendd6492258f": {}
+      }
     }
   }
 }
