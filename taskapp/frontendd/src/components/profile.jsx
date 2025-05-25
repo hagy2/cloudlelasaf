@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { fetchAuthSession, fetchUserAttributes } from '@aws-amplify/auth';
+import PinkNavbar from '../components/navbar';
 
 const API_BASE_URL = "https://m7ucuqnlaf.execute-api.us-east-1.amazonaws.com/dev";
 
@@ -8,11 +9,12 @@ function Profile() {
   return (
     <Authenticator>
       {({ user, signOut }) => {
-        console.log('Authenticator user:', user);
         return user ? (
           <ProfileContent user={user} signOut={signOut} />
         ) : (
-          <div>Please sign in to view your profile.</div>
+          <div style={{ textAlign: 'center', paddingTop: 50, fontFamily: '"Comic Sans MS", cursive' }}>
+            🌸 Please sign in to view your sparkly profile ✨
+          </div>
         );
       }}
     </Authenticator>
@@ -26,13 +28,8 @@ function ProfileContent({ user, signOut }) {
   const [message, setMessage] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  console.log('ProfileContent user:', user);
-  console.log('User userId:', user?.userId);
-
   const fetchProfile = useCallback(async () => {
-    console.log('fetchProfile called with user:', user);
     if (!user?.userId) {
-      console.log('No user or userId found');
       setError('User not authenticated');
       setLoading(false);
       return;
@@ -42,18 +39,11 @@ function ProfileContent({ user, signOut }) {
       setLoading(true);
       setError('');
       setMessage('');
-
       const userAttributes = await fetchUserAttributes();
-      console.log('Fetched user attributes:', userAttributes);
-
       const session = await fetchAuthSession();
-      console.log('Auth session:', session);
       const token = session?.tokens?.idToken?.toString();
-      console.log('JWT token:', token ? 'Token present' : 'No token');
-
       if (!token) throw new Error('Authentication token not found');
 
-      console.log('Fetching profile from:', `${API_BASE_URL}/profile`);
       const response = await fetch(`${API_BASE_URL}/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -67,8 +57,6 @@ function ProfileContent({ user, signOut }) {
       }
 
       const data = await response.json();
-      console.log('API response:', data);
-
       if (data.profile) {
         setProfile({
           name: data.profile.name || '',
@@ -78,7 +66,6 @@ function ProfileContent({ user, signOut }) {
         throw new Error('Invalid profile data structure');
       }
     } catch (err) {
-      console.error('Profile fetch error:', err);
       setError(err.message || 'Failed to load profile');
     } finally {
       setLoading(false);
@@ -86,22 +73,13 @@ function ProfileContent({ user, signOut }) {
   }, [user]);
 
   const handleUpdate = async () => {
-    if (!user?.userId) {
-      setError('User not authenticated');
-      return;
-    }
-
     try {
       setError('');
       setMessage('');
-
       const session = await fetchAuthSession();
       const token = session?.tokens?.idToken?.toString();
-      console.log('Update JWT token:', token ? 'Token present' : 'No token');
-
       if (!token) throw new Error('Authentication token not found');
 
-      console.log('Updating profile with:', profile);
       const response = await fetch(`${API_BASE_URL}/profile`, {
         method: 'PUT',
         headers: {
@@ -117,25 +95,17 @@ function ProfileContent({ user, signOut }) {
       }
 
       const data = await response.json();
-      console.log('Update API response:', data);
-      setMessage(data.message || 'Profile updated successfully');
-
+      setMessage(data.message || '🌸 Profile updated with love!');
       await fetchProfile();
     } catch (err) {
-      console.error('Update error:', err);
       setError(err.message || 'Failed to update profile');
     }
   };
 
   const handleDelete = async () => {
     try {
-      setError('');
-      setMessage('');
-
       const session = await fetchAuthSession();
       const token = session?.tokens?.idToken?.toString();
-      console.log('Delete JWT token:', token ? 'Token present' : 'No token');
-
       if (!token) throw new Error('Authentication token not found');
 
       const response = await fetch(`${API_BASE_URL}/profile`, {
@@ -151,17 +121,14 @@ function ProfileContent({ user, signOut }) {
       }
 
       const data = await response.json();
-      console.log('Delete API response:', data);
-      setMessage(data.message || 'Profile deleted successfully');
+      setMessage(data.message || '💔 Profile deleted. We’ll miss you!');
       signOut();
     } catch (err) {
-      console.error('Delete error:', err);
       setError(err.message || 'Failed to delete profile');
     }
   };
 
   useEffect(() => {
-    console.log('useEffect triggered with userId:', user?.userId);
     if (user?.userId) {
       fetchProfile();
     } else {
@@ -170,185 +137,173 @@ function ProfileContent({ user, signOut }) {
     }
   }, [user, fetchProfile]);
 
-  if (loading) return <div>Loading profile...</div>;
+  if (loading) return <div style={{ textAlign: 'center', marginTop: 40, fontFamily: '"Comic Sans MS", cursive' }}>🌸 Loading your cute profile...</div>;
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: 20 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2 style={{ margin: 0 }}>Welcome, {user?.username || 'User'}</h2>
-        <button
-          onClick={signOut}
-          style={{ 
-            padding: '8px 16px', 
-            backgroundColor: '#f5f5f5', 
-            border: '1px solid #ddd',
-            borderRadius: 4,
-            cursor: 'pointer'
-          }}
-        >
-          Sign Out
-        </button>
-      </div>
-
-      {error && (
-        <div style={{ 
-          color: 'white',
-          backgroundColor: '#ff4444',
-          padding: 10,
-          borderRadius: 4,
-          margin: '10px 0'
-        }}>
-          Error: {error}
+    <>
+      <PinkNavbar />
+      <div style={{ maxWidth: 600, margin: '0 auto', padding: 30, fontFamily: '"Comic Sans MS", "Segoe UI", cursive', backgroundColor: '#fff0f6', borderRadius: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
+          <h2 style={{ margin: 0 }}>
+            ✨ Welcome, <span style={{ color: '#e75480' }}>{user?.username || 'Cutie'}</span> 💖
+          </h2>
+          <button
+            onClick={signOut}
+            style={{
+              padding: '8px 16px',
+              background: 'linear-gradient(to right, #ff9a9e, #fad0c4)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 20,
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              boxShadow: '0 4px 10px rgba(255, 182, 193, 0.5)'
+            }}
+          >
+            🚪 Sign Out
+          </button>
         </div>
-      )}
-      
-      {message && (
-        <div style={{ 
-          color: 'white',
-          backgroundColor: '#00C851',
-          padding: 10,
-          borderRadius: 4,
-          margin: '10px 0'
-        }}>
-          {message}
-        </div>
-      )}
 
-      <div style={{ 
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 8,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        marginBottom: 20
-      }}>
-        <div style={{ margin: '15px 0' }}>
-          <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}>Name:</label>
+        {error && (
+          <div style={{ backgroundColor: '#ff4d6d', color: 'white', padding: 12, borderRadius: 10, marginBottom: 15 }}>
+            ❌ {error}
+          </div>
+        )}
+
+        {message && (
+          <div style={{ backgroundColor: '#ffb6c1', color: '#fff', padding: 12, borderRadius: 10, marginBottom: 15 }}>
+            💌 {message}
+          </div>
+        )}
+
+        <div style={{ backgroundColor: '#fffafd', padding: 20, borderRadius: 15, boxShadow: '0 4px 12px rgba(255,182,193,0.2)', marginBottom: 30 }}>
+          <label style={{ fontWeight: 'bold', marginBottom: 5, display: 'block' }}>Your Name 💕</label>
           <input
+            type="text"
             value={profile.name}
             onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-            style={{ 
-              width: '100%', 
-              padding: 10,
-              border: '1px solid #ddd',
-              borderRadius: 4,
-              fontSize: 16
+            style={{
+              width: '100%',
+              padding: 12,
+              marginBottom: 20,
+              border: '2px solid #ffc0cb',
+              borderRadius: 10,
+              fontSize: 16,
+              backgroundColor: '#fffafd',
+              boxShadow: 'inset 0 2px 5px rgba(255, 192, 203, 0.2)'
             }}
           />
-        </div>
 
-        <div style={{ margin: '15px 0' }}>
-          <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}>Email:</label>
+          <label style={{ fontWeight: 'bold', marginBottom: 5, display: 'block' }}>Your Email ✉️</label>
           <input
             type="email"
             value={profile.email}
             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-            style={{ 
-              width: '100%', 
-              padding: 10,
-              border: '1px solid #ddd',
-              borderRadius: 4,
-              fontSize: 16
+            style={{
+              width: '100%',
+              padding: 12,
+              border: '2px solid #ffc0cb',
+              borderRadius: 10,
+              fontSize: 16,
+              backgroundColor: '#fffafd',
+              boxShadow: 'inset 0 2px 5px rgba(255, 192, 203, 0.2)'
             }}
           />
-        </div>
 
-        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-          <button 
+          <button
             onClick={handleUpdate}
-            style={{ 
-              padding: '10px 20px', 
-              backgroundColor: '#4285f4',
+            style={{
+              marginTop: 20,
+              width: '100%',
+              padding: 12,
+              background: 'linear-gradient(to right, #ffb6c1, #ffc0cb)',
               color: 'white',
               border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer',
+              borderRadius: 10,
               fontSize: 16,
-              flex: 1
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 4px 10px rgba(255, 182, 193, 0.3)'
             }}
           >
-            Update Profile
+            💾 Save 
           </button>
         </div>
-      </div>
 
-      <div style={{ 
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 8,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        borderLeft: '4px solid #ff4444'
-      }}>
-        <h3 style={{ marginTop: 0, color: '#ff4444' }}>Danger Zone</h3>
-        <p style={{ marginBottom: 20 }}>Permanently delete your account and all associated data.</p>
-        <button
-          onClick={() => setShowDeleteConfirm(true)}
-          style={{ 
-            padding: '10px 20px', 
-            backgroundColor: '#ff4444',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-            fontSize: 16
-          }}
-        >
-          Delete Account
-        </button>
-      </div>
+        <div style={{ backgroundColor: '#fff', padding: 20, borderRadius: 10, borderLeft: '5px solid #ff4d6d', boxShadow: '0 4px 12px rgba(255,192,203,0.2)' }}>
+          <h3 style={{ color: '#e75480' }}>⚠️💔 Danger Zone</h3>
+          <p>This will permanently delete your profile . This action cannot be undone.</p>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#ff6f91',
+              color: 'white',
+              border: 'none',
+              borderRadius: 10,
+              cursor: 'pointer',
+              fontSize: 16,
+              fontWeight: 'bold'
+            }}
+          >
+            💣 Delete My Account
+          </button>
+        </div>
 
-      {showDeleteConfirm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
+        {showDeleteConfirm && (
           <div style={{
-            backgroundColor: 'white',
-            padding: 20,
-            borderRadius: 8,
-            maxWidth: 400,
-            width: '100%'
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
           }}>
-            <h3 style={{ marginTop: 0 }}>Confirm Deletion</h3>
-            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#f5f5f5',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  cursor: 'pointer'
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#ff4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer'
-                }}
-              >
-                Delete Account
-              </button>
+            <div style={{
+              backgroundColor: 'white',
+              padding: 25,
+              borderRadius: 10,
+              width: '90%',
+              maxWidth: 400,
+              textAlign: 'center',
+              fontFamily: '"Comic Sans MS", cursive'
+            }}>
+              <h3 style={{ marginBottom: 10 }}>Are you really sure? 😢</h3>
+              <p>This will break our hearts. Do you *really* want to delete your account?</p>
+              <div style={{ marginTop: 20, display: 'flex', justifyContent: 'center', gap: 10 }}>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#ddd',
+                    border: 'none',
+                    borderRadius: 8,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🚫 Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#ff4d6d',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  💔 Yes, Delete Me
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
 

@@ -11,23 +11,19 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import Signup from './auth/signup';
 import Signin from './auth/SignIn';
 import Signout from './auth/Signout';
+import CuteHomepage from './home';
 import TaskManager from './components/TaskManager';
  
 import Profile from './components/profile';
 
 function Home() {
   return (
-    <header className="App-header">
-      <img src={logo} className="App-logo" alt="logo" />
-      <p>Edit <code>src/App.js</code> and save to reload.</p>
-      <nav>
-        <Link to="/profile" className="App-link">Go to Profile</Link>|{' '}
-        <Link to="/tasks" className="App-link">Go to Tasks</Link> |{' '}
-        <Link to="/signin" className="App-link">Sign In</Link> |{' '}
-        <Link to="/signup" className="App-link">Sign Up</Link> |{' '}
-        <Link to="/signout" className="App-link">Sign Out</Link>
-      </nav>
-    </header>
+
+
+      <Routes>
+        <Route path="/" element={<CuteHomepage />} />
+    </Routes>
+
   );
 }
 

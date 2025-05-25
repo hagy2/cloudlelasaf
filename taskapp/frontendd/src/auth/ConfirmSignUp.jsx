@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 // Correct way in Amplify v6+
 import { Auth } from 'aws-amplify';
-
+import PinkNavbar from '../components/navbar';
 
 export default function ConfirmSignUp() {
   const [email, setEmail] = useState('');
@@ -19,10 +19,13 @@ export default function ConfirmSignUp() {
   };
 
   return (
+    <>
+      <PinkNavbar />
     <div>
       <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
       <input placeholder="Code" onChange={e => setCode(e.target.value)} />
       <button onClick={confirm}>Confirm</button>
     </div>
+    </>
   );
 }

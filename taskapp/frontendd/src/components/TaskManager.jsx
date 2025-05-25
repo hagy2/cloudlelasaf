@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { fetchAuthSession, getCurrentUser } from "@aws-amplify/auth";
 import { useNavigate } from "react-router-dom";
-
+import PinkNavbar from '../components/navbar';
 const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -391,6 +391,7 @@ const TaskManager = () => {
 
   // Show loading screen while checking authentication
   if (authLoading) {
+
     return (
       <div
         style={{
@@ -446,448 +447,519 @@ const TaskManager = () => {
   }
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* Header */}
+    <>
+      <PinkNavbar />
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-          padding: "15px",
-          backgroundColor: "#e9ecef",
-          borderRadius: "5px",
-        }}
-      >
-        <div>
-          <h1 style={{ margin: 0 }}>Task Management System</h1>
-          <p style={{ margin: "5px 0 0 0", color: "#666" }}>
-            Welcome, {user?.username || user?.email || "User"}!
-          </p>
-        </div>
-        <button
-          onClick={() => navigate("/signout")}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#dc3545",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          Sign Out
-        </button>
-      </div>
-
-      {/* Error Display */}
-      {error && (
-        <div
-          style={{
-            padding: "15px",
-            marginBottom: "20px",
-            backgroundColor: "#f8d7da",
-            border: "1px solid #f5c6cb",
-            borderRadius: "5px",
-            color: "#721c24",
-          }}
-        >
-          <strong>Error:</strong> {error}
-          <button
-            onClick={() => setError(null)}
-            style={{
-              float: "right",
-              background: "none",
-              border: "none",
-              fontSize: "18px",
-              cursor: "pointer",
-              color: "#721c24",
-            }}
-          >
-            ×
-          </button>
-        </div>
-      )}
-
-      {/* Create Task Section */}
-      <div
-        style={{
-          border: "1px solid #ccc",
           padding: "20px",
-          marginBottom: "20px",
-          borderRadius: "5px",
-          backgroundColor: "#f8f9fa",
+          maxWidth: "1200px",
+          margin: "0 auto",
+          fontFamily: '"Comic Sans MS","Segoe UI",cursive',
+          backgroundColor: "#fff0f6",
+          borderRadius: "20px",
         }}
       >
-        <h2>Create New Task</h2>
-
-        <div style={{ marginBottom: "10px" }}>
-          <label>Title:</label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-            disabled={loading}
-          />
-        </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <label>Description:</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            rows="4"
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-            disabled={loading}
-          />
-        </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <label>Status:</label>
-          <select
-            value={formData.status}
-            onChange={(e) =>
-              setFormData({ ...formData, status: e.target.value })
-            }
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-            disabled={loading}
-          >
-            <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <label>Attach File (optional):</label>
-          <input
-            type="file"
-            onChange={handleFileSelect}
-            style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-            disabled={loading}
-          />
-          {selectedFile && (
-            <p style={{ fontSize: "12px", color: "#666" }}>
-              Selected: {selectedFile.name} (
-              {(selectedFile.size / 1024).toFixed(1)} KB)
-            </p>
-          )}
-        </div>
-
-        <button
-          onClick={createTask}
-          disabled={
-            loading || !formData.title.trim() || !formData.description.trim()
-          }
-          style={{
-            padding: "10px 20px",
-            backgroundColor:
-              loading || !formData.title.trim() || !formData.description.trim()
-                ? "#ccc"
-                : "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor:
-              loading || !formData.title.trim() || !formData.description.trim()
-                ? "not-allowed"
-                : "pointer",
-          }}
-        >
-          {loading ? "Creating..." : "Create Task"}
-        </button>
-      </div>
-
-      {/* Tasks List */}
-      <div>
+        {/* 🌸 Header */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            marginBottom: "25px",
+            padding: "18px 22px",
+            background: "linear-gradient(90deg,#ff9a9e,#fad0c4)",
+            borderRadius: "15px",
+            boxShadow: "0 4px 12px rgba(255,182,193,.35)",
+            color: "#fff",
           }}
         >
-          <h2>Your Tasks ({tasks.length})</h2>
+          <div>
+            <h1 style={{ margin: 0, fontSize: "28px" }}>🎀 Task Manager</h1>
+            <p style={{ margin: "6px 0 0 0", fontSize: "14px" }}>
+              Welcome, <strong>{user?.username || user?.email || "Cutie"}</strong>! 💖
+            </p>
+          </div>
           <button
-            onClick={fetchTasks}
-            disabled={loading}
+            onClick={() => navigate("/signout")}
             style={{
-              padding: "8px 16px",
-              backgroundColor: "#28a745",
-              color: "white",
+              padding: "10px 20px",
+              background: "linear-gradient(90deg,#ff6f91,#ff9472)",
               border: "none",
-              borderRadius: "4px",
-              cursor: loading ? "not-allowed" : "pointer",
+              borderRadius: "30px",
+              color: "#fff",
+              cursor: "pointer",
+              fontWeight: "bold",
+              boxShadow: "0 3px 8px rgba(255,105,135,.4)",
             }}
           >
-            {loading ? "Loading..." : "Refresh"}
+            🚪 Sign Out
           </button>
         </div>
 
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "20px" }}>
-            <p>Loading tasks...</p>
-          </div>
-        ) : tasks.length === 0 ? (
+        {/* 🚨 Error Display */}
+        {error && (
           <div
             style={{
-              textAlign: "center",
-              padding: "40px",
-              backgroundColor: "#f8f9fa",
-              borderRadius: "5px",
-              border: "1px solid #dee2e6",
+              position: "relative",
+              padding: "15px 20px",
+              marginBottom: "20px",
+              backgroundColor: "#ffe5e9",
+              border: "2px solid #ffb3c1",
+              borderRadius: "12px",
+              color: "#d62857",
+              fontWeight: "600",
             }}
           >
-            <h3>No tasks found</h3>
-            <p>Create your first task above to get started!</p>
+            ❌ {error}
+            <button
+              onClick={() => setError(null)}
+              style={{
+                position: "absolute",
+                top: "8px",
+                right: "12px",
+                background: "none",
+                border: "none",
+                fontSize: "20px",
+                lineHeight: 1,
+                cursor: "pointer",
+                color: "#d62857",
+              }}
+            >
+              ×
+            </button>
           </div>
-        ) : (
-          <div style={{ display: "grid", gap: "15px" }}>
-            {tasks.map((task) => (
-              <div
-                key={task.task_id}
-                style={{
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  padding: "20px",
-                  backgroundColor: "#ffffff",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                }}
-              >
-                {editingTask === task.task_id ? (
-                  // Edit Form
-                  <div>
-                    <h3 style={{ margin: "0 0 15px 0", color: "#333" }}>
-                      Edit Task
-                    </h3>
+        )}
 
-                    <div style={{ marginBottom: "10px" }}>
-                      <label>Title:</label>
-                      <input
-                        type="text"
-                        value={editFormData.title}
-                        onChange={(e) =>
-                          setEditFormData({
-                            ...editFormData,
-                            title: e.target.value,
-                          })
-                        }
-                        style={{
-                          width: "100%",
-                          padding: "8px",
-                          marginTop: "5px",
-                        }}
-                        disabled={loading}
-                      />
-                    </div>
+        {/* ✨ Create Task */}
+        <div
+          style={{
+            border: "2px dashed #ffc0cb",
+            padding: "25px",
+            marginBottom: "30px",
+            borderRadius: "15px",
+            backgroundColor: "#fffafd",
+            boxShadow: "0 3px 10px rgba(255,192,203,.25)",
+          }}
+        >
+          <h2 style={{ marginTop: 0, color: "#e75480" }}>➕ Create New Task</h2>
 
-                    <div style={{ marginBottom: "10px" }}>
-                      <label>Description:</label>
-                      <textarea
-                        value={editFormData.description}
-                        onChange={(e) =>
-                          setEditFormData({
-                            ...editFormData,
-                            description: e.target.value,
-                          })
-                        }
-                        rows="3"
-                        style={{
-                          width: "100%",
-                          padding: "8px",
-                          marginTop: "5px",
-                        }}
-                        disabled={loading}
-                      />
-                    </div>
+          {/* Title */}
+          <div style={{ marginBottom: "14px" }}>
+            <label style={{ fontWeight: "600" }}>Title 💕</label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginTop: "6px",
+                border: "2px solid #ffc0cb",
+                borderRadius: "10px",
+              }}
+              disabled={loading}
+            />
+          </div>
 
-                    <div style={{ marginBottom: "15px" }}>
-                      <label>Status:</label>
-                      <select
-                        value={editFormData.status}
-                        onChange={(e) =>
-                          setEditFormData({
-                            ...editFormData,
-                            status: e.target.value,
-                          })
-                        }
-                        style={{
-                          width: "100%",
-                          padding: "8px",
-                          marginTop: "5px",
-                        }}
-                        disabled={loading}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="in-progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                      </select>
-                    </div>
+          {/* Description */}
+          <div style={{ marginBottom: "14px" }}>
+            <label style={{ fontWeight: "600" }}>Description 📝</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows="4"
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginTop: "6px",
+                border: "2px solid #ffc0cb",
+                borderRadius: "10px",
+                resize: "vertical",
+              }}
+              disabled={loading}
+            />
+          </div>
 
-                    <div style={{ display: "flex", gap: "10px" }}>
-                      <button
-                        onClick={() => updateTask(task.task_id)}
-                        disabled={
-                          loading ||
-                          !editFormData.title.trim() ||
-                          !editFormData.description.trim()
-                        }
-                        style={{
-                          padding: "8px 16px",
-                          backgroundColor:
+          {/* Status */}
+          <div style={{ marginBottom: "14px" }}>
+            <label style={{ fontWeight: "600" }}>Status ✨</label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginTop: "6px",
+                border: "2px solid #ffc0cb",
+                borderRadius: "10px",
+                backgroundColor: "#fffafd",
+              }}
+              disabled={loading}
+            >
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+          {/* File */}
+          <div style={{ marginBottom: "18px" }}>
+            <label style={{ fontWeight: "600" }}>Attach File (optional) 📎</label>
+            <input
+              type="file"
+              onChange={handleFileSelect}
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginTop: "6px",
+                border: "2px solid #ffc0cb",
+                borderRadius: "10px",
+                backgroundColor: "#fffafd",
+              }}
+              disabled={loading}
+            />
+            {selectedFile && (
+              <p style={{ fontSize: "12px", marginTop: "6px", color: "#666" }}>
+                Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+              </p>
+            )}
+          </div>
+
+          {/* Create Button */}
+          <button
+            onClick={createTask}
+            disabled={loading || !formData.title.trim() || !formData.description.trim()}
+            style={{
+              padding: "12px 30px",
+              background: loading
+                ? "#ffc9d6"
+                : "linear-gradient(90deg,#ffb6c1,#ffc0cb)",
+              border: "none",
+              borderRadius: "30px",
+              color: "#fff",
+              fontWeight: "bold",
+              cursor: loading ? "not-allowed" : "pointer",
+              boxShadow: "0 3px 8px rgba(255,182,193,.35)",
+            }}
+          >
+            {loading ? "Creating…" : "🌟 Create Task"}
+          </button>
+        </div>
+
+        {/* 📋 Task List */}
+        <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "15px",
+            }}
+          >
+            <h2 style={{ margin: 0, color: "#e75480" }}>
+              🗂️ Your Tasks ({tasks.length})
+            </h2>
+            <button
+              onClick={fetchTasks}
+              disabled={loading}
+              style={{
+                padding: "8px 20px",
+                background: loading
+                  ? "#ffc9d6"
+                  : "linear-gradient(90deg,#ff9a9e,#fad0c4)",
+                border: "none",
+                borderRadius: "25px",
+                color: "#fff",
+                fontWeight: "bold",
+                cursor: loading ? "not-allowed" : "pointer",
+                boxShadow: "0 3px 8px rgba(255,182,193,.35)",
+              }}
+            >
+              {loading ? "Loading…" : "🔄 Refresh"}
+            </button>
+          </div>
+
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "30px" }}>
+              <p>Loading tasks…</p>
+            </div>
+          ) : tasks.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "50px",
+                backgroundColor: "#fffafd",
+                borderRadius: "15px",
+                border: "2px dashed #ffc0cb",
+              }}
+            >
+              <h3 style={{ color: "#e75480", margin: "0 0 10px 0" }}>
+                No tasks yet
+              </h3>
+              <p style={{ margin: 0 }}>Create a task above to get started! 🌱</p>
+            </div>
+          ) : (
+            /* ----- tasks grid ----- */
+            <div style={{ display: "grid", gap: "18px" }}>
+              {tasks.map((task) => (
+                <div
+                  key={task.task_id}
+                  style={{
+                    border: "2px solid #ffc0cb",
+                    borderRadius: "15px",
+                    padding: "22px",
+                    backgroundColor: "#ffffff",
+                    boxShadow: "0 3px 8px rgba(255,182,193,.25)",
+                  }}
+                >
+                  {editingTask === task.task_id ? (
+                    /* -------- Edit Mode -------- */
+                    <>
+                      <h3 style={{ margin: "0 0 15px 0", color: "#e75480" }}>
+                        ✏️ Edit Task
+                      </h3>
+
+                      {/* title */}
+                      <div style={{ marginBottom: "12px" }}>
+                        <label style={{ fontWeight: "600" }}>Title 💕</label>
+                        <input
+                          type="text"
+                          value={editFormData.title}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              title: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "10px",
+                            marginTop: "6px",
+                            border: "2px solid #ffc0cb",
+                            borderRadius: "10px",
+                          }}
+                          disabled={loading}
+                        />
+                      </div>
+
+                      {/* description */}
+                      <div style={{ marginBottom: "12px" }}>
+                        <label style={{ fontWeight: "600" }}>
+                          Description 📝
+                        </label>
+                        <textarea
+                          value={editFormData.description}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              description: e.target.value,
+                            })
+                          }
+                          rows="3"
+                          style={{
+                            width: "100%",
+                            padding: "10px",
+                            marginTop: "6px",
+                            border: "2px solid #ffc0cb",
+                            borderRadius: "10px",
+                          }}
+                          disabled={loading}
+                        />
+                      </div>
+
+                      {/* status */}
+                      <div style={{ marginBottom: "18px" }}>
+                        <label style={{ fontWeight: "600" }}>Status ✨</label>
+                        <select
+                          value={editFormData.status}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              status: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "10px",
+                            marginTop: "6px",
+                            border: "2px solid #ffc0cb",
+                            borderRadius: "10px",
+                            backgroundColor: "#fffafd",
+                          }}
+                          disabled={loading}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="in-progress">In Progress</option>
+                          <option value="completed">Completed</option>
+                        </select>
+                      </div>
+
+                      {/* action buttons */}
+                      <div style={{ display: "flex", gap: "12px" }}>
+                        <button
+                          onClick={() => updateTask(task.task_id)}
+                          disabled={
                             loading ||
                             !editFormData.title.trim() ||
                             !editFormData.description.trim()
-                              ? "#ccc"
-                              : "#28a745",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor:
-                            loading ||
-                            !editFormData.title.trim() ||
-                            !editFormData.description.trim()
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
-                      >
-                        {loading ? "Saving..." : "Save"}
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        disabled={loading}
+                          }
+                          style={{
+                            flex: 1,
+                            padding: "10px 0",
+                            background:
+                              loading ||
+                              !editFormData.title.trim() ||
+                              !editFormData.description.trim()
+                                ? "#ffc9d6"
+                                : "linear-gradient(90deg,#ffb6c1,#ffc0cb)",
+                            border: "none",
+                            borderRadius: "30px",
+                            color: "#fff",
+                            fontWeight: "bold",
+                            cursor:
+                              loading ||
+                              !editFormData.title.trim() ||
+                              !editFormData.description.trim()
+                                ? "not-allowed"
+                                : "pointer",
+                          }}
+                        >
+                          {loading ? "Saving…" : "💾 Save"}
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          disabled={loading}
+                          style={{
+                            flex: 1,
+                            padding: "10px 0",
+                            background: "#d8d8d8",
+                            border: "none",
+                            borderRadius: "30px",
+                            color: "#555",
+                            fontWeight: "bold",
+                            cursor: loading ? "not-allowed" : "pointer",
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    /* -------- Display Mode -------- */
+                    <>
+                      <h3 style={{ margin: "0 0 10px 0", color: "#e75480" }}>
+                        {task.title}
+                      </h3>
+                      <p
                         style={{
-                          padding: "8px 16px",
-                          backgroundColor: "#6c757d",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: loading ? "not-allowed" : "pointer",
+                          margin: "0 0 15px 0",
+                          color: "#666",
+                          lineHeight: "1.6",
                         }}
                       >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  // Display Mode
-                  <div>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <h3 style={{ margin: "0 0 10px 0", color: "#333" }}>
-                          {task.title}
-                        </h3>
-                        <p
-                          style={{
-                            margin: "0 0 15px 0",
-                            color: "#666",
-                            lineHeight: "1.5",
-                          }}
-                        >
-                          {task.description}
-                        </p>
+                        {task.description}
+                      </p>
 
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "20px",
-                            fontSize: "14px",
-                            color: "#888",
-                            flexWrap: "wrap",
-                            marginBottom: "15px",
-                          }}
-                        >
-                          <span>
-                            Status:{" "}
-                            <strong
-                              style={{
-                                color:
-                                  task.status === "completed"
-                                    ? "#28a745"
-                                    : task.status === "in-progress"
-                                    ? "#ffc107"
-                                    : "#6c757d",
-                              }}
-                            >
-                              {task.status}
-                            </strong>
-                          </span>
-                          <span>
-                            Created:{" "}
-                            {task.created_at
-                              ? new Date(task.created_at).toLocaleDateString()
-                              : "Unknown"}
-                          </span>
-                          <span>
-                            ID:{" "}
-                            {task.task_id
-                              ? task.task_id.slice(0, 8) + "..."
-                              : "Unknown"}
-                          </span>
-                        </div>
+                      {/* meta */}
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "15px",
+                          fontSize: "13px",
+                          color: "#888",
+                          flexWrap: "wrap",
+                          marginBottom: "18px",
+                        }}
+                      >
+                        <span>
+                          Status:{" "}
+                          <strong
+                            style={{
+                              color:
+                                task.status === "completed"
+                                  ? "#28a745"
+                                  : task.status === "in-progress"
+                                  ? "#ffc107"
+                                  : "#6c757d",
+                            }}
+                          >
+                            {task.status}
+                          </strong>
+                        </span>
+                        <span>
+                          Created:{" "}
+                          {task.created_at
+                            ? new Date(task.created_at).toLocaleDateString()
+                            : "Unknown"}
+                        </span>
+                        <span>
+                          ID: {task.task_id.slice(0, 8)}…
+                        </span>
+                      </div>
 
-                        {/* Action Buttons */}
+                      {/* display & action buttons */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          gap: "20px",
+                        }}
+                      >
+                        {/* left → buttons */}
                         <div style={{ display: "flex", gap: "10px" }}>
                           <button
                             onClick={() => startEditTask(task)}
                             disabled={loading}
                             style={{
-                              padding: "6px 12px",
-                              backgroundColor: "#007bff",
-                              color: "white",
+                              padding: "6px 14px",
+                              background:
+                                "linear-gradient(90deg,#bface2,#e9defa)",
                               border: "none",
-                              borderRadius: "4px",
+                              borderRadius: "25px",
+                              color: "#6a4ba3",
+                              fontWeight: "600",
                               cursor: loading ? "not-allowed" : "pointer",
                               fontSize: "14px",
                             }}
                           >
-                            Edit
+                            ✏️ Edit
                           </button>
                           <button
                             onClick={() => deleteTask(task.task_id, task.title)}
                             disabled={loading}
                             style={{
-                              padding: "6px 12px",
-                              backgroundColor: "#dc3545",
-                              color: "white",
+                              padding: "6px 14px",
+                              background:
+                                "linear-gradient(90deg,#ff7c89,#ffb199)",
                               border: "none",
-                              borderRadius: "4px",
+                              borderRadius: "25px",
+                              color: "#fff",
+                              fontWeight: "600",
                               cursor: loading ? "not-allowed" : "pointer",
                               fontSize: "14px",
                             }}
                           >
-                            Delete
+                            🗑️ Delete
                           </button>
                         </div>
-                      </div>
 
-                      {task.file_url && task.file_name && (
-                        <div style={{ marginLeft: "20px" }}>
+                        {/* right → attachment preview */}
+                        {task.file_url && task.file_name && (
                           <div
                             style={{
                               padding: "12px 16px",
-                              backgroundColor: "#e3f2fd",
-                              borderRadius: "6px",
+                              backgroundColor: "#ffeef2",
+                              borderRadius: "10px",
                               textAlign: "center",
-                              border: "1px solid #bbdefb",
+                              border: "2px dashed #ffc0cb",
                             }}
                           >
                             <p
                               style={{
                                 margin: "0 0 8px 0",
                                 fontSize: "12px",
-                                color: "#1976d2",
+                                color: "#d6336c",
                                 fontWeight: "600",
                               }}
                             >
@@ -897,15 +969,8 @@ const TaskManager = () => {
                               href={task.file_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              onClick={() => {
-                                console.log("=== FILE CLICKED ===");
-                                console.log("Task:", task.title);
-                                console.log("File URL:", task.file_url);
-                                console.log("File Name:", task.file_name);
-                                console.log("==================");
-                              }}
                               style={{
-                                color: "#1976d2",
+                                color: "#d6336c",
                                 textDecoration: "none",
                                 fontSize: "14px",
                                 fontWeight: "600",
@@ -918,43 +983,39 @@ const TaskManager = () => {
                               style={{
                                 margin: "8px 0 0 0",
                                 fontSize: "10px",
-                                color: "#757575",
+                                color: "#adadad",
                               }}
                             >
-                              (Signed URL - 7 days validity)
+                              (valid 7 days)
                             </p>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Security Notice */}
-      <div
-        style={{
-          marginTop: "30px",
-          padding: "15px",
-          backgroundColor: "#d4edda",
-          border: "1px solid #c3e6cb",
-          borderRadius: "5px",
-        }}
-      >
-        <h4 style={{ margin: "0 0 10px 0", color: "#155724" }}>
-          🔒 Security Enabled
-        </h4>
-        <p style={{ margin: "0", fontSize: "14px", color: "#155724" }}>
-          This Task Management System is now secured with AWS Cognito
-          authentication. Only authenticated users can create, view, edit, and
-          delete tasks.
-        </p>
+        {/* 🔒 Security Notice */}
+        <div
+          style={{
+            marginTop: "35px",
+            padding: "18px 22px",
+            backgroundColor: "#e9f7ef",
+            border: "2px solid #c3e6cb",
+            borderRadius: "15px",
+            color: "#155724",
+            fontWeight: "600",
+          }}
+        >
+          🔒 This Task Manager is secured with AWS Cognito. Only authenticated
+          users can create, view, edit, and delete tasks.
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

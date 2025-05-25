@@ -1,0 +1,48 @@
+.pink-navbar {
+  background: linear-gradient(90deg, #fcb6d0, #ffd6e8);
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 12px rgba(255, 182, 193, 0.4);
+  border-radius: 0 0 20px 20px;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-logo {
+  font-size: 1.8rem;
+  color: #ff4d94;
+  font-weight: bold;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-button {
+  background-color: #fff0f5;
+  color: #d63384;
+  border: 2px solid #ff99cc;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease-in-out;
+}
+
+.nav-button:hover {
+  background-color: #ffe6f0;
+  color: #ff1493;
+  transform: scale(1.05);
+}
+
+.nav-button.active {
+  background-color: #ffc0cb;
+  color: white;
+  border-color: #ff69b4;
+}
