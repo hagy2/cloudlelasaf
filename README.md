@@ -100,3 +100,6 @@ sign up using frontend , the log in, navigate to taksks and create a task, sign 
 ### Challenges Faced
 -connecting lambda with RDS
 -connecting AUTH and allowing CORS
+
+### Deployment
+-http://18.211.84.56 
