@@ -1,3 +1,4 @@
+@@ -1,10 +1,92 @@
 # Task Management System on AWS
 
 [![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com)
@@ -6,6 +7,15 @@
 
 ```mermaid
 graph TD
+    A[React Frontend] -->|HTTP Requests| B[API Gateway]
+    B -->|Route Requests| C[Lambda Functions]
+    C -->|CRUD Operations| D[(DynamoDB)]
+    C -->|Relational Data| E[(RDS MySQL)]
+    C -->|File Storage| F[(S3 Bucket)]
+    A -->|Authentication| G[Cognito User Pool]
+    C -->|Async Notifications| H[SQS Queue]
+    H -->|Trigger| I[Lambda: Send Emails]
+    C -->|Logging & Monitoring| J[CloudWatch]
     subgraph Frontend
         A[React Web App] -->|Authenticate| B[Cognito User Pool]
         A -->|API Calls| C[API Gateway]
